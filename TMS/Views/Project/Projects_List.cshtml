@@ -1,0 +1,160 @@
+﻿@model PagedList.IPagedList<TMS.Models.ProjectViewModel>
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Project List";
+}
+
+<div class="container mt-4 pe-5">
+    <div class="container bg-dark text-white rounded shadow">
+        <h4 class="text-white p-1">Projects</h4>
+    </div>
+
+    <!-- Search and Filter -->
+    <form method="get" action="@Url.Action("Projects_List")" class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex gap-2 w-50">
+            <!-- Status Filter -->
+            <select class="form-select border border-primary w-50 p-2" name="statusFilter" onchange="this.form.submit()">
+                <option value="">All Status</option>
+                <option value="Active" @(ViewBag.StatusFilter == "Active" ? "selected" : "")>Active</option>
+                <option value="Completed" @(ViewBag.StatusFilter == "Completed" ? "selected" : "")>Completed</option>
+                <option value="On Hold" @(ViewBag.StatusFilter == "On Hold" ? "selected" : "")>On Hold</option>
+            </select>
+
+            <!-- Search Input -->
+            <div class="input-group flex-grow-1">
+                <input type="text" class="form-control border border-primary" placeholder="Search projects..."
+                       name="searchQueryProject" value="@ViewBag.SearchQuery">
+                <button class="btn btn-outline-primary" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <a href="@Url.Action("Project_Manage", "Project")" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Add Project
+        </a>
+    </form>
+
+    <!-- Project Table -->
+    <table class="table table-striped table-hover table-sm small">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Project Code</th>
+                <th>Name</th>
+                <th style="white-space: nowrap;">Created By</th>
+                <th style="white-space: nowrap;">Created At</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                int index = 1;
+                foreach (var project in Model)
+                {
+                    <tr>
+                        <td>@index</td>
+                        <td style="white-space: nowrap;">@project.ProjectCode</td>
+                        <td style="max-width: 150px; word-wrap: break-word; overflow-wrap: break-word;">
+                            @if (project.Name.Length > 25)
+                            {
+                                <span data-bs-toggle="tooltip" title="@project.Name">
+                                    @project.Name.Substring(0, 25)...
+                                </span>
+                            }
+                            else
+                            {
+                                @project.Name
+                            }
+                        </td>
+                        <td style="max-width: 150px; word-wrap: break-word; overflow-wrap: break-word;">
+                            @if (project.CreatedBy.Length > 15)
+                            {
+                                <span data-bs-toggle="tooltip" title="@project.CreatedBy">
+                                    @project.CreatedBy.Substring(0, 15)...
+                                </span>
+                            }
+                            else
+                            {
+                                @project.CreatedBy
+                            }
+                        </td>                        
+                        <td style="white-space: nowrap;">@project.CreatedAt.ToString("yyyy-MM-dd")</td>
+                        <td style="white-space: nowrap;">
+                            @(project.DueDate.HasValue ? project.DueDate.Value.ToString("yyyy-MM-dd") : "No Due Date")
+                        </td>
+                        <td>
+                            <span class="badge @(project.Status == "Active" ? "bg-success" : project.Status == "Completed" ? "bg-primary" : "bg-warning")">
+                                @project.Status
+                            </span>
+                        </td>
+                        <td class="text-center" style="white-space: nowrap;">
+                            <a href="@Url.Action("Project_View", "Project", new { projectId = project.Id })" class="btn btn-info btn-sm" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="@Url.Action("Project_Manage", "Project", new { id = project.Id })" class="btn btn-warning btn-sm" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#projectRemoveModal-@project.Id">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    index++;
+                    @Html.Partial("_Project_Remove", project)
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="9" class="text-center text-muted">No projects found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <span class="text-muted">Showing @Model.Count() projects</span>
+
+        <nav aria-label="Project pagination">
+            <ul class="pagination pagination-sm mb-0">
+                @if (Model.HasPreviousPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Projects_List", new { page = 1 })">&laquo;</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Projects_List", new { page = Model.PageNumber - 1 })">‹</a>
+                    </li>
+                }
+
+                @for (int i = 1; i <= Model.PageCount; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Projects_List", new { page = i })">@i</a>
+                    </li>
+                }
+
+                @if (Model.HasNextPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Projects_List", new { page = Model.PageNumber + 1 })">›</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Projects_List", new { page = Model.PageCount })">&raquo;</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
+
+</div>
+
+@Html.Partial("~/Views/Shared/_Sidebar.cshtml")
+@Html.Action("GetUsersList", "User")

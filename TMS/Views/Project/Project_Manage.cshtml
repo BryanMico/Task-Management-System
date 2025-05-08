@@ -1,0 +1,70 @@
+﻿@model TMS.Models.Project
+
+@{
+    ViewBag.Title = Model.Id == 0 ? "Create Project" : "Edit Project";
+}
+
+<div class="container mt-4 pe-5">
+    <!-- Header -->
+    <div class="container bg-dark text-white rounded shadow">
+        <h4 class="text-white p-1">@ViewBag.Title</h4>
+    </div>
+
+    <div class="card shadow-sm p-4">
+        @using (Html.BeginForm("Project_Manage", "Project", FormMethod.Post, new { @class = "needs-validation", novalidate = "novalidate" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.Id)
+
+            <div class="row g-3">
+                <!-- Project Name -->
+                <div class="col-md-6">
+                    <label class="form-label">Project Name</label>
+                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control", placeholder = "Enter project name", required = "required", maxlength = "50"})
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Project Code</label>
+                    @Html.TextBoxFor(model => model.ProjectCode, new { @class = "form-control", @readonly = "readonly", placeholder = "Auto-generated on save" })
+                </div>
+
+                <!-- Description -->
+                <div class="col-md-12">
+                    <label class="form-label">Description</label>
+                    @Html.TextAreaFor(model => model.Description, new { @class = "form-control", rows = "5", placeholder = "Enter project description", maxlength = "300" })
+                </div>
+
+                <!-- Created At (Read-Only) -->
+                <div class="col-md-6">
+                    <label class="form-label">Created At</label>
+                    @Html.TextBoxFor(model => model.CreatedAt, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+
+                <!-- Due Date -->
+                <div class="col-md-6">
+                    <label class="form-label">Due Date</label>
+                    @Html.TextBoxFor(model => model.DueDate, new { @class = "form-control", type = "date" })
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-6">
+                    <label class="form-label">Status</label>
+                    @Html.DropDownListFor(model => model.Status, new SelectList(new[] { "Active", "Completed", "On Hold" }), "Select Status", new { @class = "form-select" })
+                </div>
+
+                <!-- Submit & Cancel Buttons -->
+                <div class="col-12 d-flex justify-content-between">
+                    <a href="@Url.Action("Projects_List", "Project")" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Save Project
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@Html.Partial("~/Views/Shared/_Sidebar.cshtml")
+@Html.Action("GetUsersList", "User")

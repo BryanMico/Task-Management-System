@@ -1,0 +1,114 @@
+﻿@model TMS.Models.DashboardViewModel
+
+@{
+    ViewBag.Title = "Dashboard - Client";
+}
+
+<div class="container mt-4 pe-5">
+    <div class="container bg-dark text-white rounded shadow">
+        <h4 class="text-white p-1">Dashboard</h4>
+    </div>
+
+    <!-- Task Summary -->
+    <div class="row mb-4 pt-3">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary text-center p-3 shadow-sm rounded">
+                <h5>Total Tasks</h5>
+                <h3>@Model.TotalTasks</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning text-center p-3 shadow-sm rounded">
+                <h5>Pending</h5>
+                <h3>@Model.PendingTasks</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info text-center p-3 shadow-sm rounded">
+                <h5>In Progress</h5>
+                <h3>@Model.InProgressTasks</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success text-center p-3 shadow-sm rounded">
+                <h5>Completed</h5>
+                <h3>@Model.CompletedTasks</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Table -->
+    <div class="card shadow rounded mt-4">
+        <div class="card-header bg-dark text-white text-center fw-bold">Latest Tasks</div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered table-sm">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Assigned To</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.LatestTasks != null && Model.LatestTasks.Any())
+                        {
+                            foreach (var task in Model.LatestTasks)
+                            {
+                                <tr>
+                                    <td>@task.Title</td>
+                                    <td style="white-space: nowrap;">
+                                        <div class="d-flex flex-column">
+                                            <div class="small">
+                                                Start:
+                                                <span class="fw-normal">@(task.StartDate != null ? task.StartDate.ToString("dd/MM/yyyy") : "N/A")</span>
+                                            </div>
+                                            <div class="small">
+                                                Due:
+                                                <span class="fw-normal">@(task.DueDate != null ? task.DueDate.ToString("dd/MM/yyyy") : "N/A")</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(task.Status == "Completed" ? "bg-success" : task.Status == "In Progress" ? "bg-info" : task.Status == "Pending" ? "bg-warning" : "bg-secondary")">
+                                            @task.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(task.Priority == "High" ? "bg-danger" : task.Priority == "Medium" ? "bg-warning" : "bg-success")">
+                                            @task.Priority
+                                        </span>
+                                    </td>
+                                    <td>@task.AssignedTo</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No recent tasks available</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.IsNewUser || TempData["ShowChangePasswordModal"] != null)
+{
+    @Html.Partial("~/Views/User/_ChangePasswordModal.cshtml", new TMS.Models.ChangePasswordViewModel { UserId = (int)Session["UserID"] })
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+            changePasswordModal.show();
+        });
+    </script>
+}
+
+
+@Html.Partial("~/Views/Shared/_Sidebar.cshtml")
+@Html.Action("GetUsersList", "User")

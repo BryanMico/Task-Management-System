@@ -1,0 +1,152 @@
+﻿@model TMS.Models.TaskViewModel
+
+@{
+    ViewBag.Title = "Task Details - Client";
+}
+
+<div class="container mt-4 pe-5">
+    <!-- Back Button and Transfer Button -->
+    <div class="d-flex justify-content-between mb-3">
+        <a href="@Url.Action("Tasks_Assigned", "Task")" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+
+        <!-- Transfer Task Button (Visible only if task is not completed) -->
+        @if (Model.Status != "Completed")
+        {
+            <div>
+                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#transferTaskModal">
+                    <i class="bi bi-arrow-repeat"></i> Transfer Task
+                </button>
+            </div>
+        }
+    </div>
+
+    <!-- Task Header -->
+    <div class="bg-dark text-white rounded shadow-sm p-3 mb-3">
+        <h5 class="text-white mb-0"><i class="bi bi-clipboard-check"></i> Task: @Model.Title</h5>
+    </div>
+
+    <!-- Task Details Card -->
+    <div class="card shadow-sm p-4" style="border-radius: 12px; background-color: #f9f9f9;">
+        <div class="row">
+            <!-- Left Column: Basic Info -->
+            <div class="col-md-5 border-end">
+                <h6 class="text-secondary mb-3"><i class="bi bi-info-circle"></i> Task Information</h6>
+
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Task Type:</strong> @Model.TaskType</li>
+                    <li class="list-group-item">
+                        <strong>Priority:</strong>
+                        <span class="badge @(Model.Priority == "High" ? "bg-danger" : Model.Priority == "Medium" ? "bg-warning" : "bg-success")">
+                            @Model.Priority
+                        </span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Status:</strong>
+                        <span class="badge @(Model.Status == "Completed" ? "bg-success" : Model.Status == "In Progress" ? "bg-primary" : "bg-warning")">
+                            @Model.Status
+                        </span>
+                    </li>
+                    <li class="list-group-item"><strong>Created By:</strong> @Model.CreatedBy</li>
+                    <li class="list-group-item"><strong>Start Date:</strong> @(Model.StartDate != DateTime.MinValue ? Model.StartDate.ToString("dd/MM/yyyy") : "N/A")</li>
+                    <li class="list-group-item"><strong>Due Date:</strong> @(Model.DueDate != DateTime.MinValue ? Model.DueDate.ToString("dd/MM/yyyy") : "N/A")</li>
+                </ul>
+            </div>
+
+            <!-- Right Column: Description -->
+            <div class="col-md-7">
+                <h6 class="text-secondary mb-3"><i class="bi bi-file-text"></i> Description</h6>
+                <div class="border rounded p-3 bg-light" style="font-size: 0.95rem; line-height: 1.6; min-height: 150px;">
+                    @Html.Raw(Model.Description?.Trim().Replace("&nbsp;", " ").Replace("<br />", "<br>").Replace("<br>", ""))
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.TaskNotes))
+            {
+                <div class="mt-4">
+                    <h6 class="text-secondary">
+                        <i class="bi bi-chat-left-text"></i>
+                        @(Model.Status == "Completed" ? "Completion Note" : "Transfer Note")
+                    </h6>
+
+                    @if (Model.Status == "Completed")
+                    {
+                        <p class="text-muted fs-6">Completed by <strong>@Model.CompletedBy</strong> on @Model.CompletedDate.Value.ToString("dd/MM/yyyy HH:mm")</p>
+
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(Model.TransferredBy)
+                             && !string.IsNullOrEmpty(Model.TransferredTo)
+                             && Model.TransferredDate.HasValue)
+                        {
+                            <p class="text-muted fs-6">
+                                Transferred by <strong>@Model.TransferredBy</strong> to
+                                <strong>@Model.TransferredTo</strong> on
+                                @Model.TransferredDate.Value.ToString("dd/MM/yyyy HH:mm")
+                            </p>
+                        }
+                    }
+
+                    <div class="border rounded p-3 bg-light" style="font-size: 0.95rem; line-height: 1.6;">
+                        @Model.TaskNotes
+                    </div>
+                </div>
+            }
+
+
+        </div>
+
+        <!-- Transfer Task Modal -->
+        <div class="modal fade" id="transferTaskModal" tabindex="-1" aria-labelledby="transferTaskModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title" id="transferTaskModalLabel"><i class="bi bi-arrow-repeat"></i> Transfer Task</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="transferTaskForm" action="@Url.Action("TransferTask_Admin", "Task")" method="post">
+                            <input type="hidden" name="TaskId" value="@Model.Id" />
+
+                            <!-- User Dropdown -->
+                            <div class="mb-3">
+                                <label for="TransferToUserId" class="form-label"><strong>Select User to Transfer</strong></label>
+                                <select class="form-select" name="TransferToUserId" id="TransferToUserId" required>
+                                    <option value="">-- Select User --</option>
+                                    @if (ViewBag.UsersList != null)
+                                    {
+                                        foreach (var user in ViewBag.UsersList as List<TMS.Models.User>)
+                                        {
+                                            <option value="@user.Id">@user.FullName</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option value="" disabled>No users available</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- Transfer Note -->
+                            <div class="mb-3">
+                                <label for="TransferNote" class="form-label"><strong>Transfer Note</strong></label>
+                                <textarea class="form-control" name="TransferNote" id="TransferNote" rows="3" placeholder="Provide a reason for the transfer..." required></textarea>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-warning"><i class="bi bi-send"></i> Transfer Task</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@Html.Partial("~/Views/Shared/_Sidebar.cshtml")
+@Html.Action("GetUsersList", "User")

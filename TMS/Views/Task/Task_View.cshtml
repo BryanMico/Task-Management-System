@@ -1,0 +1,100 @@
+﻿@model TMS.Models.TaskViewModel
+
+@{
+    ViewBag.Title = "Task Details";
+}
+
+<div class="container mt-4 pe-5">
+    <!-- Back Button -->
+    <div class="d-flex justify-content-between mb-3">
+        <a href="@Url.Action("Tasks_List", "Task")" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+
+        <!-- Assigned To Information -->
+        <div class="pt-3">
+            <strong>Assigned To:</strong> @Model.AssignedTo
+        </div>
+    </div>
+
+
+    <!-- Task Header -->
+    <div class="bg-dark text-white rounded shadow-sm p-3 mb-3">
+        <h5 class="text-white mb-0"><i class="bi bi-clipboard-check"></i> Task: @Model.Title</h5>
+    </div>
+
+    <!-- Task Details Card -->
+    <div class="card shadow-sm p-4" style="border-radius: 12px; background-color: #f9f9f9;">
+        <div class="row">
+            <!-- Left Column: Basic Info -->
+            <div class="col-md-5 border-end">
+                <h6 class="text-secondary mb-3"><i class="bi bi-info-circle"></i> Task Information</h6>
+
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Task Type:</strong> @Model.TaskType</li>
+                    <li class="list-group-item">
+                        <strong>Priority:</strong>
+                        <span class="badge @(Model.Priority == "High" ? "bg-danger" : Model.Priority == "Medium" ? "bg-warning" : "bg-success")">
+                            @Model.Priority
+                        </span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Status:</strong>
+                        <span class="badge @(Model.Status == "Completed" ? "bg-success" : Model.Status == "In Progress" ? "bg-primary" : "bg-warning")">
+                            @Model.Status
+                        </span>
+                    </li>
+                    <li class="list-group-item"><strong>Created By:</strong> @Model.CreatedBy</li>
+                    <li class="list-group-item"><strong>Start Date:</strong> @(Model.StartDate != DateTime.MinValue ? Model.StartDate.ToString("dd/MM/yyyy") : "N/A")</li>
+                    <li class="list-group-item"><strong>Due Date:</strong> @(Model.DueDate != DateTime.MinValue ? Model.DueDate.ToString("dd/MM/yyyy") : "N/A")</li>
+                </ul>
+            </div>
+
+            <!-- Right Column: Description -->
+            <div class="col-md-7">
+                <h6 class="text-secondary mb-3"><i class="bi bi-file-text"></i> Description</h6>
+                <div class="border rounded p-3 bg-light" style="font-size: 0.95rem; line-height: 1.6; min-height: 150px;">
+                    @Html.Raw(Model.Description?.Trim().Replace("&nbsp;", " ").Replace("<br />", "<br>").Replace("<br>", ""))
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.TaskNotes))
+            {
+        <div class="mt-4">
+            <h6 class="text-secondary">
+                <i class="bi bi-chat-left-text"></i>
+                @(Model.Status == "Completed" ? "Completion Note" : "Transfer Note")
+            </h6>
+
+            @if (Model.Status == "Completed")
+            {
+                <p class="text-muted fs-6">Completed by <strong>@Model.CompletedBy</strong> on @Model.CompletedDate.Value.ToString("dd/MM/yyyy HH:mm")</p>
+
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(Model.TransferredBy)
+                && !string.IsNullOrEmpty(Model.TransferredTo)
+                && Model.TransferredDate.HasValue)
+                {
+                    <p class="text-muted fs-6">
+                        Transferred by <strong>@Model.TransferredBy</strong> to
+                        <strong>@Model.TransferredTo</strong> on
+                        @Model.TransferredDate.Value.ToString("dd/MM/yyyy HH:mm")
+                    </p>
+                }
+            }
+
+            <div class="border rounded p-3 bg-light" style="font-size: 0.95rem; line-height: 1.6;">
+                @Model.TaskNotes
+            </div>
+        </div>
+            }
+        </div>
+
+
+    </div>
+</div>
+
+@Html.Partial("~/Views/Shared/_Sidebar.cshtml")
+@Html.Action("GetUsersList", "User")

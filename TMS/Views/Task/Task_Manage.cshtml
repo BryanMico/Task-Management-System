@@ -1,0 +1,149 @@
+﻿@model TMS.Models.Task
+
+@{
+    ViewBag.Title = Model.Id == 0 ? "Create Task" : "Edit Task";
+}
+
+<div class="container mt-4 pe-5">
+    <!-- Header -->
+    <div class="container bg-dark text-white rounded shadow">
+        <h4 class="text-white p-1">@ViewBag.Title</h4>
+    </div>
+
+    <div class="card shadow-sm p-4">
+        @using (Html.BeginForm("Task_Manage", "Task", FormMethod.Post, new { @class = "needs-validation", novalidate = "novalidate" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.Id)
+
+            <!-- Tab Navigation -->
+            <ul class="nav nav-tabs mb-3" id="taskTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" id="tab-step-1" data-bs-toggle="tab" href="#step-1">Step 1: Details</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="tab-step-2" data-bs-toggle="tab" href="#step-2">Step 2: Assignment</a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- Step 1: Task Basic Details -->
+                <div class="tab-pane fade show active" id="step-1">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Project</label>
+                            @Html.DropDownListFor(model => model.ProjectId, new SelectList(ViewBag.Projects, "Id", "Name"), "Select Project", new { @class = "form-select" })
+                        </div>
+
+                        <!-- Task Title -->
+                        <div class="col-md-6">
+                            <label class="form-label">Task Title</label>
+                            @Html.TextBoxFor(model => model.Title, new { @class = "form-control", placeholder = "Enter task title", required = "required", maxlength = "50" })
+                            @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- Task Type Dropdown -->
+                        <div class="col-md-6">
+                            <label class="form-label">Task Type</label>
+                            @Html.DropDownListFor(model => model.TaskType, new SelectList(Enum.GetValues(typeof(TMS.Models.TaskType))), "Select Task Type", new { @class = "form-select", required = "required" })
+                        </div>
+
+                        <!-- Task Description (Text Editor) -->
+                        <div class="col-md-12">
+                            <label class="form-label">Description</label>
+                            <textarea id="taskDescription" name="Description" class="form-control" rows="6">@Model.Description</textarea>
+                        </div>
+
+                        <!-- ✅ Buttons should be inside the row -->
+                        <div class="col-12 d-flex justify-content-between mt-3">
+                            <a href="@Url.Action("Tasks_List", "Task")" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <button type="button" class="btn btn-primary" id="nextStep">
+                                Next <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Step 2: Task Assignment & Scheduling -->
+                <div class="tab-pane fade" id="step-2">
+                    <div class="row g-3">
+                        <!-- Task Status -->
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            @Html.DropDownListFor(model => model.Status, new SelectList(new[] { "Pending", "In Progress", "Completed" }), "Select Status", new { @class = "form-select" })
+                        </div>
+
+                        <!-- Task Priority -->
+                        <div class="col-md-6">
+                            <label class="form-label">Priority</label>
+                            @Html.DropDownListFor(model => model.Priority, new SelectList(new[] { "Low", "Medium", "High" }), "Select Priority", new { @class = "form-select" })
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="col-md-6">
+                            <label class="form-label">Start Date</label>
+                            @Html.TextBoxFor(model => model.StartDate, new { @class = "form-control", type = "date", required = "required" })
+                        </div>
+
+                        <!-- Due Date -->
+                        <div class="col-md-6">
+                            <label class="form-label">Due Date</label>
+                            @Html.TextBoxFor(model => model.DueDate, new { @class = "form-control", type = "date", required = "required" })
+                        </div>
+
+                        <!-- Assign to User -->
+                        <div class="col-md-6">
+                            <label class="form-label">Assign To</label>
+                            @Html.DropDownListFor(model => model.AssignedToId, new SelectList(ViewBag.Users, "Id", "FullName"), "Select User", new { @class = "form-select" })
+                        </div>
+                    </div>
+
+                    <!-- Back & Submit Buttons -->
+                    <div class="mt-3 d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary" id="prevStep">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Save Task
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@Html.Partial("~/Views/Shared/_Sidebar.cshtml")
+@Html.Action("GetUsersList", "User")
+
+<script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
+<script>
+    ClassicEditor
+        .create(document.querySelector('#taskDescription'), {
+            toolbar: [
+                'heading', '|', 'bold', 'italic', 'underline', '|',
+                'bulletedList', 'numberedList', '|', 'undo', 'redo'
+            ],
+            removePlugins: ['ImageUpload', 'MediaEmbed', 'EasyImage', 'LinkImage', 'CKFinder'],
+            height: '500px' // Set the height in CKEditor config
+        })
+        .catch(error => console.error(error));
+
+
+    document.getElementById('nextStep').addEventListener('click', function () {
+        document.getElementById('tab-step-2').click();
+    });
+
+    document.getElementById('prevStep').addEventListener('click', function () {
+        document.getElementById('tab-step-1').click();
+    });
+</script>
+
+<style>
+    .ck-editor__editable {
+        min-height: 500px; /* Adjust as needed */
+    }
+</style>

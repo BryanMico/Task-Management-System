@@ -1,0 +1,177 @@
+﻿@model PagedList.IPagedList<TMS.Models.TaskViewModel>
+@using PagedList.Mvc
+
+@{
+    ViewBag.Title = "Task List";
+}
+
+<div class="container mt-4 pe-5">
+    <div class="container bg-dark text-white rounded shadow">
+        <h4 class="text-white p-1">Tasks</h4>
+    </div>
+
+    <!-- Search and Filter -->
+    <form method="get" action="@Url.Action("Tasks_List", "Task")" class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex gap-2 w-50">
+            <!-- Status Filter -->
+            <select class="form-select border border-primary w-50 p-2" name="statusFilter">
+                <option value="">All Status</option>
+                <option value="Pending" @(ViewBag.StatusFilter == "Pending" ? "selected" : "")>Pending</option>
+                <option value="In Progress" @(ViewBag.StatusFilter == "In Progress" ? "selected" : "")>In Progress</option>
+                <option value="Completed" @(ViewBag.StatusFilter == "Completed" ? "selected" : "")>Completed</option>
+            </select>
+
+            <!-- Search Input -->
+            <div class="input-group flex-grow-1">
+                <input type="text" class="form-control border border-primary" placeholder="Search tasks..." name="searchQueryTask" value="@ViewBag.SearchQuery">
+                <button class="btn btn-outline-primary" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <a href="@Url.Action("Task_Manage", "Task")" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Add Task
+        </a>
+    </form>
+
+    <!-- Task Table -->
+    <table class="table table-striped table-hover table-sm small">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th style="white-space: nowrap;">Title</th>
+                <th style="white-space: nowrap;">Task Type</th>
+                <th style="white-space: nowrap;">Created By</th>
+                <th style="white-space: nowrap;">Assigned To</th>
+                <th style="white-space: nowrap;">Dates</th> 
+                <th style="white-space: nowrap;">Priority</th>
+                <th style="white-space: nowrap;">Status</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                int index = 1;
+                foreach (var task in Model)
+                {
+            <tr>
+                <td>@index</td>
+                <td style="max-width: 100px;">
+                    <div class="text-truncate" style="max-width: 150px;" data-bs-toggle="tooltip" title="@task.Title">
+                        @task.Title
+                    </div>
+                </td>
+
+                <td style="max-width: 100px;">
+                    <div class="text-truncate" style="max-width: 150px;" data-bs-toggle="tooltip" title="@task.TaskType">
+                        @task.TaskType
+                    </div>
+                </td>
+
+
+                <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <span data-bs-toggle="tooltip" title="@task.CreatedBy">
+                        @(task.CreatedBy.Length > 12 ? task.CreatedBy.Substring(0, 12) + "..." : task.CreatedBy)
+                    </span>
+                </td>
+
+                <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <span data-bs-toggle="tooltip" title="@task.AssignedTo">
+                        @(task.AssignedTo.Length > 12 ? task.AssignedTo.Substring(0, 12) + "..." : task.AssignedTo)
+                    </span>
+                </td>
+
+                <td style="white-space: nowrap; text-align: center;">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="small text-muted">
+                            Start:
+                            <span class="fw-normal">@(task.StartDate != null ? task.StartDate.ToString("dd/MM/yyyy") : "N/A")</span>
+                        </div>
+                        <div class="small text-muted">
+                            Due:
+                            <span class="fw-normal">@(task.DueDate != null ? task.DueDate.ToString("dd/MM/yyyy") : "N/A")</span>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <span class="badge @(task.Priority == "High" ? "bg-danger" : task.Priority == "Medium" ? "bg-warning" : "bg-success")">
+                        @task.Priority
+                    </span>
+                </td>
+
+                <td>
+                    <span class="badge @(task.Status == "Completed" ? "bg-success" : task.Status == "In Progress" ? "bg-primary" : "bg-warning")">
+                        @task.Status
+                    </span>
+                </td>
+
+                <td class="text-center" style="white-space: nowrap;">
+                    <a href="@Url.Action("Task_View", "Task", new { id = task.Id })" class="btn btn-info btn-sm" title="View">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="@Url.Action("Task_Manage", "Task", new { id = task.Id })" class="btn btn-warning btn-sm" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#taskRemoveModal-@task.Id">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+                    index++;
+                    @Html.Partial("_Task_Remove", task)
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="9" class="text-center text-muted">No tasks found</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <span class="text-muted">Showing @Model.Count() tasks</span>
+
+        <nav aria-label="Task pagination">
+            <ul class="pagination pagination-sm mb-0">
+                @if (Model.HasPreviousPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Tasks_List", new { page = 1, searchQueryTask = ViewBag.SearchQuery, statusFilter = ViewBag.StatusFilter })">&laquo;</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Tasks_List", new { page = Model.PageNumber - 1, searchQueryTask = ViewBag.SearchQuery, statusFilter = ViewBag.StatusFilter })">‹</a>
+                    </li>
+                }
+
+                @for (int i = 1; i <= Model.PageCount; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Tasks_List", new { page = i, searchQueryTask = ViewBag.SearchQuery, statusFilter = ViewBag.StatusFilter })">@i</a>
+                    </li>
+                }
+
+                @if (Model.HasNextPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Tasks_List", new { page = Model.PageNumber + 1, searchQueryTask = ViewBag.SearchQuery, statusFilter = ViewBag.StatusFilter })">›</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Tasks_List", new { page = Model.PageCount, searchQueryTask = ViewBag.SearchQuery, statusFilter = ViewBag.StatusFilter })">&raquo;</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
+
+
+</div>
+
+@Html.Partial("~/Views/Shared/_Sidebar.cshtml")
+@Html.Action("GetUsersList", "User")

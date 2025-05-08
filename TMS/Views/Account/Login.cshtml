@@ -1,0 +1,33 @@
+﻿@model TMS.Models.LoginViewModel
+
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("Login", "Account", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="container d-flex justify-content-center align-items-center p-5">
+        <div class="p-5 w-50 border border-2 rounded-2">
+            <div class="text-center mb-4">
+                <i class="bi-person-circle text-primary" style="font-size: 5rem;"></i>
+            </div>
+
+            <div class="mb-3">
+                @Html.LabelFor(model => model.Email, "Email", new { @class = "form-label" })
+                @Html.TextBoxFor(model => model.Email, new { @class = "form-control", id = "username", placeholder = "Enter your email", required = "required", maxlength = "50" })
+                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger fs-6" })
+            </div>
+
+            <div class="mb-3">
+                @Html.LabelFor(model => model.Password, "Password", new { @class = "form-label" })
+                @Html.PasswordFor(model => model.Password, new { @class = "form-control", id = "password", placeholder = "Enter your password", required = "required", maxlength = "50" })
+                @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger fs-6" })
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </div>
+    </div>
+}
