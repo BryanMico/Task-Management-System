@@ -18,7 +18,22 @@
                 @fullName
             }
         </h6>
-        <small class="text-secondary-emphasis">@userEmail</small>
+        <small class="text-secondary-emphasis" style="max-width: 200px; display: inline-block; word-wrap: break-word;">
+            @{
+                var atIndex = userEmail.IndexOf('@');
+                if (atIndex > 0)
+                {
+                    @userEmail.Substring(0, atIndex)
+                    <br />
+                    @userEmail.Substring(atIndex)
+                }
+                else
+                {
+                    @userEmail
+                }
+            }
+        </small>
+
     </div>
     <!-- Sidebar navigation -->
     <ul class="nav flex-column gap-2 flex-grow-1">

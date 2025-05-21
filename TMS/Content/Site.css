@@ -30,3 +30,8 @@
     right: 20px;
     z-index: 1050; /* Ensures it's on top of other content */
 }
+
+.body-content {
+    margin-left: 250px; /* Offset for fixed sidebar (adjust as needed) */
+    width: calc(100% - 250px); /* Make it fill remaining space */
+}

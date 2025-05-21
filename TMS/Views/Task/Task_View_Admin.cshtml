@@ -49,7 +49,7 @@
                         </span>
                     </li>
                     <li class="list-group-item"><strong>Created By:</strong> @Model.CreatedBy</li>
-                    <li class="list-group-item"><strong>Start Date:</strong> @(Model.StartDate != DateTime.MinValue ? Model.StartDate.ToString("dd/MM/yyyy") : "N/A")</li>
+                    <li class="list-group-item"><strong>Date Reported</strong> @(Model.StartDate != DateTime.MinValue ? Model.StartDate.ToString("dd/MM/yyyy") : "N/A")</li>
                     <li class="list-group-item"><strong>Due Date:</strong> @(Model.DueDate != DateTime.MinValue ? Model.DueDate.ToString("dd/MM/yyyy") : "N/A")</li>
                 </ul>
             </div>

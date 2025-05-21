@@ -108,3 +108,4 @@ C:\Users\LEGION\source\repos\TMS\TMS\obj\Debug\TMS.csproj.CopyComplete
 C:\Users\LEGION\source\repos\TMS\TMS\obj\Debug\TMS.dll
 C:\Users\LEGION\source\repos\TMS\TMS\obj\Debug\TMS.pdb
 C:\Users\LEGION\source\repos\TMS\TMS\obj\Debug\TMS.csproj.AssemblyReference.cache
+C:\Users\LEGION\source\repos\TMS\TMS\obj\Debug\TMS.Migrations.InitialCreate1.resources

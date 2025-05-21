@@ -17,11 +17,27 @@
             <i class="bi bi-journal"></i> Task Management System
         </a>
     </nav>
-    
-    <div class="container body-content pt-5 px-5 pb-4 w-75">
-        @RenderBody()
-        @Html.Partial("_Validation")
-    </div>
+
+    @{
+        var isLoginPage = ViewBag.Title != null && ViewBag.Title.ToString().Contains("Login");
+    }
+
+    @* Conditionally render container with different classes *@
+    @if (isLoginPage)
+    {
+        <div class="container body-content pt-5 px-5 pb-4 w-75 mx-auto">
+            @RenderBody()
+            @Html.Partial("_Validation")
+        </div>
+    }
+    else
+    {
+        <div class="container-fluid body-content pt-5 pb-4">
+            @RenderBody()
+            @Html.Partial("_Validation")
+        </div>
+    }
+
 
     <!-- Footer -->
     <footer class="bg-primary fixed-bottom w-100 text-center text-white py-2 mt-auto">

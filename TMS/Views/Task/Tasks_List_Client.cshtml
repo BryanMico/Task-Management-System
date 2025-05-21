@@ -44,7 +44,7 @@
                 <th style="white-space: nowrap;">Task Type</th>
                 <th style="white-space: nowrap;">Created By</th>
                 <th style="white-space: nowrap;">Assigned To</th>
-                <th style="white-space: nowrap;">Dates</th>
+                <th style="white-space: nowrap;">Due DateS</th>
                 <th>Priority</th>
                 <th>Status</th>
                 <th class="text-center">Actions</th>
@@ -96,14 +96,9 @@
                             </span>
                         </td>
 
-                        <td style="white-space: nowrap; text-align: center;">
-                            <div class="d-flex flex-column align-items-center">
+                        <td text-align: center;">
+                            <div class="align-items-center">
                                 <div class="small text-muted">
-                                    Start:
-                                    <span class="fw-normal">@(task.StartDate != null ? task.StartDate.ToString("dd/MM/yyyy") : "N/A")</span>
-                                </div>
-                                <div class="small text-muted">
-                                    Due:
                                     <span class="fw-normal">@(task.DueDate != null ? task.DueDate.ToString("dd/MM/yyyy") : "N/A")</span>
                                 </div>
                             </div>
